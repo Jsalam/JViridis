@@ -43,9 +43,9 @@ public class ColorGradient {
 	 *            the number of gradient steps
 	 * @param position
 	 *            the color position in the gradient scale
-	 * @return the integer value of this RGB color
+	 * @return the integer value of this RGB color. If no color is available, it returns black
 	 */
-	public static int getColorStepFromGradient(Color c, int totalSteps, int position) {
+	public static int getStepIntValueFromGradient(Color c, int totalSteps, int position) {
 		int rtn = 0;
 		Color[] palette = getColorGradient(c, totalSteps);
 
@@ -53,6 +53,27 @@ public class ColorGradient {
 			return palette[position].getRGB();
 		} catch (Exception np) {
 			return rtn;
+		}
+	}
+	
+	/**
+	 * Gets a specific color from a color gradient
+	 * 
+	 * @param c
+	 *            the java.lang.Color
+	 * @param totalSteps
+	 *            the number of gradient steps
+	 * @param position
+	 *            the color position in the gradient scale
+	 * @return the integer value of this RGB color. If no color is available, it returns black
+	 */
+	public static Color getStepColorFromGradient(Color c, int totalSteps, int position) {
+		Color[] palette = getColorGradient(c, totalSteps);
+
+		try {
+			return palette[position];
+		} catch (Exception np) {
+			return Color.BLACK;
 		}
 	}
 }
