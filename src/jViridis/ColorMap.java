@@ -3,6 +3,9 @@ package jViridis;
 import java.awt.Color;
 import java.awt.color.ColorSpace;
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -110,6 +113,9 @@ public class ColorMap {
 		case "plasma":
 			colorMap = getColorMap("plasma.cmap");
 			break;
+		default:
+			colorMap = getColorMap(mapName);
+
 		}
 	}
 
@@ -121,20 +127,30 @@ public class ColorMap {
 	 */
 	private Color[] getColorMap(String fileName) {
 		ArrayList<Color> tempColors = new ArrayList<Color>();
-		try (BufferedReader br = new BufferedReader(
-				new InputStreamReader(ColorMap.class.getResourceAsStream(fileName)))) {
-			String sCurrentLine;
-			while ((sCurrentLine = br.readLine()) != null) {
-				String values[] = sCurrentLine.split(" ");
-				float red = Float.valueOf(values[0]);
-				float green = Float.valueOf(values[1]);
-				float blue = Float.valueOf(values[2]);
-				tempColors.add(new Color(red, green, blue));
-			}
+		
+		fileName = System.getProperty("user.dir") + "/colorPalettes/"+fileName;
 
-		} catch (IOException e) {
-			e.printStackTrace();
+		try {
+			InputStreamReader inputReader = null;
+			inputReader = new FileReader(fileName);
+			try (BufferedReader br = new BufferedReader(inputReader)) {
+				String sCurrentLine;
+				while ((sCurrentLine = br.readLine()) != null) {
+					String values[] = sCurrentLine.split(" ");
+					float red = Float.valueOf(values[0]);
+					float green = Float.valueOf(values[1]);
+					float blue = Float.valueOf(values[2]);
+					tempColors.add(new Color(red, green, blue));
+				}
+
+			}	 catch (IOException e) {
+				e.printStackTrace();
+			}
+		} catch (FileNotFoundException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
 		}
+		
 
 		Color[] rtn = new Color[tempColors.size()];
 		for (int i = 0; i < tempColors.size(); i++) {
