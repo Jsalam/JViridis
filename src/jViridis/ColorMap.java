@@ -8,6 +8,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.URL;
 import java.util.ArrayList;
 
 import processing.core.PApplet;
@@ -35,6 +36,9 @@ public class ColorMap {
 	public static final String INFERNO = "inferno";
 	public static final String MAGMA = "magma";
 	public static final String PLASMA = "plasma";
+
+	private ArrayList<String> cMapNames;
+	private ArrayList<String> cMapFileNames;
 
 	private static ColorMap colorMapInstance = null;
 
@@ -75,6 +79,10 @@ public class ColorMap {
 	private ColorMap(String cMap) {
 		loadColorMap(cMap);
 		currentMap = cMap;
+		cMapNames = new ArrayList<String>();
+		cMapFileNames = new ArrayList<String>();
+		loadAllColorMapNames();
+
 	}
 
 	/**
@@ -114,9 +122,74 @@ public class ColorMap {
 			colorMap = getColorMap("plasma.cmap");
 			break;
 		default:
-			colorMap = getColorMap(mapName);
+			if (!mapName.startsWith(".")) {
+				colorMap = getColorMap(mapName);
+				int index = mapName.indexOf('.');
+				if (index >= 0 && !cMapNames.contains(mapName.substring(0, index))) {
+					cMapNames.add(mapName.substring(0, index));
+				}
 
+			}
 		}
+	}
+
+	/**
+	 * Loads all colorMap Names available in the color map folder.
+	 * 
+	 */
+	private void loadAllColorMapNames() {
+
+		String[] colorPaletteNames = getCMapFileNames();
+
+		for (String fileName : colorPaletteNames) {
+			if (!fileName.startsWith(".")) {
+				int index = fileName.indexOf('.');
+				if (!cMapNames.contains(fileName.substring(0, index))) {
+					cMapNames.add(fileName.substring(0, index));
+					cMapFileNames.add(fileName);
+				}
+			}
+		}
+	}
+
+	public String[] getCMapFileNames() {
+
+		// copied from
+		// https://stackoverflow.com/questions/15359702/get-location-of-jar-file/15359999
+		URL url;
+
+		try {
+			url = this.getClass().getProtectionDomain().getCodeSource().getLocation();
+		} catch (SecurityException ex) {
+			url = this.getClass().getResource(this.getClass().getSimpleName() + ".class");
+		}
+
+		// remove the last /chunk/
+		String path = url.getPath();
+		System.out.println(this.getClass().getName() + " " + path);
+
+		String [] chunks = path.split("/");
+		for (String s:chunks) {
+			System.out.println(s);
+		}
+		int index = path.indexOf(chunks[chunks.length-1]);
+		path = path.substring(0, index);
+		
+		File folder = new File(path + "/colorPalettes/");
+		System.out.println(this.getClass().getName() + " " + folder.getPath());
+		
+		File[] listOfFiles = folder.listFiles();
+		String[] fileNames = new String[listOfFiles.length];
+
+		int i = 0;
+		for (File file : listOfFiles) {
+			if (file.isFile()) {
+				fileNames[i] = file.getName();
+				i++;
+			}
+		}
+
+		return fileNames;
 	}
 
 	/**
@@ -127,8 +200,48 @@ public class ColorMap {
 	 */
 	private Color[] getColorMap(String fileName) {
 		ArrayList<Color> tempColors = new ArrayList<Color>();
+
+		/*
+		 * compose file name if it does not have extension
+		 */
+		if (fileName.charAt(fileName.length() - 4) != '.') {
+
+			// look for the name in the colorPalette folder and get the extension
+			for (String fName : getCMapFileNames()) {
+				int index = fName.indexOf('.');
+				String fNameSubString = fName.substring(0, index);
+
+				if (fileName.equals(fNameSubString)) {
+
+					// retrieve the name of the file with extension
+					fileName = fName;
+				}
+			}
+		}
+
 		
-		fileName = System.getProperty("user.dir") + "/colorPalettes/"+fileName;
+		// copied from
+		// https://stackoverflow.com/questions/15359702/get-location-of-jar-file/15359999
+		URL url;
+
+		try {
+			url = this.getClass().getProtectionDomain().getCodeSource().getLocation();
+		} catch (SecurityException ex) {
+			url = this.getClass().getResource(this.getClass().getSimpleName() + ".class");
+		}
+
+		// remove the last /chunk/
+		String path = url.getPath();
+		System.out.println(this.getClass().getName() + " " + path);
+
+		String [] chunks = path.split("/");
+		for (String s:chunks) {
+			System.out.println(s);
+		}
+		int index = path.indexOf(chunks[chunks.length-1]);
+		path = path.substring(0, index);		
+		
+		fileName = path + "/colorPalettes/" + fileName;
 
 		try {
 			InputStreamReader inputReader = null;
@@ -143,20 +256,24 @@ public class ColorMap {
 					tempColors.add(new Color(red, green, blue));
 				}
 
-			}	 catch (IOException e) {
+			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		} catch (FileNotFoundException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-		
 
 		Color[] rtn = new Color[tempColors.size()];
 		for (int i = 0; i < tempColors.size(); i++) {
 			rtn[i] = tempColors.get(i);
 		}
 		return rtn;
+	}
+
+	public String[] getColorPaletteNames() {
+		String[] rtn = new String[cMapNames.size()];
+		return cMapNames.toArray(rtn);
 	}
 
 	/**
@@ -292,8 +409,6 @@ public class ColorMap {
 		}
 		return palette;
 	}
-
-	
 
 	public void show(PApplet app, int orgX, int orgY) {
 
