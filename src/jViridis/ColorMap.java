@@ -166,17 +166,11 @@ public class ColorMap {
 
 		// remove the last /chunk/
 		String path = url.getPath();
-		System.out.println(this.getClass().getName() + " " + path);
-
 		String [] chunks = path.split("/");
-		for (String s:chunks) {
-			System.out.println(s);
-		}
 		int index = path.indexOf(chunks[chunks.length-1]);
 		path = path.substring(0, index);
 		
 		File folder = new File(path + "/colorPalettes/");
-		System.out.println(this.getClass().getName() + " " + folder.getPath());
 		
 		File[] listOfFiles = folder.listFiles();
 		String[] fileNames = new String[listOfFiles.length];
@@ -232,12 +226,7 @@ public class ColorMap {
 
 		// remove the last /chunk/
 		String path = url.getPath();
-		System.out.println(this.getClass().getName() + " " + path);
-
 		String [] chunks = path.split("/");
-		for (String s:chunks) {
-			System.out.println(s);
-		}
 		int index = path.indexOf(chunks[chunks.length-1]);
 		path = path.substring(0, index);		
 		
